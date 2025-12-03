@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily Neuro Training</title>
+    <!-- Tailwind CSS for Modern UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f0f4f8;
+            touch-action: manipulation; /* Prevent double-tap zoom */
+            user-select: none;
+        }
+
+        /* Custom Animations */
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+
+        .animate-pop { animation: popIn 0.3s ease-out forwards; }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
+        .animate-pulse-green { animation: pulse-green 0.5s; }
+
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Hide scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Button Press Effect */
+        .btn-press:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="h-screen w-full text-slate-700 flex flex-col items-center justify-center overflow-hidden relative">
+
+    <!-- Background Elements -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-64 h-64 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app" class="w-full max-w-md h-full flex flex-col relative px-4 py-6">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-brain text-indigo-600 text-2xl"></i>
+                <h1 class="text-xl font-bold tracking-tight text-slate-800">NeuroDaily</h1>
+            </div>
+            <div class="text-xs font-medium bg-white px-3 py-1 rounded-full shadow-sm text-slate-500">
+                <span id="date-display">2023.01.01</span>
+            </div>
+        </header>
+
+        <!-- VIEWS -->
+
+        <!-- 1. LOADING VIEW -->
+        <div id="view-loading" class="flex-1 flex flex-col justify-center items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+            <p class="text-sm text-slate-500">ニューロン接続中...</p>
+        </div>
+
+        <!-- 2. HOME VIEW (Start) -->
+        <div id="view-home" class="hidden flex-1 flex flex-col justify-center items-center animate-pop">
+            <div class="text-center mb-8">
+                <div class="inline-block p-4 bg-indigo-100 rounded-full mb-4">
+                    <i class="fa-solid fa-bolt text-indigo-600 text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">今日の脳トレ</h2>
+                <p class="text-slate-500 text-sm px-6">
+                    ライフキネティック理論に基づく<br>
+                    1日1回の短期集中トレーニング。
+                </p>
+            </div>
+
+            <div class="game-card w-full p-6 mb-8 border-l-4 border-indigo-500">
+                <h3 id="daily-title" class="text-lg font-bold mb-1 text-indigo-900">Task Loading...</h3>
+                <p id="daily-desc" class="text-sm text-slate-600 mb-4">...</p>
+                <div class="flex items-center text-xs text-slate-400 gap-4">
+                    <span><i class="fa-regular fa-clock mr-1"></i> 30秒</span>
+                    <span><i class="fa-solid fa-trophy mr-1"></i> スコアアタック</span>
+                </div>
+            </div>
+
+            <button onclick="app.startGame()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transition-all btn-press flex items-center justify-center gap-2">
+                <i class="fa-solid fa-play"></i> トレーニング開始
+            </button>
+            <p class="text-xs text-center text-slate-400 mt-4">※音は出ません</p>
+        </div>
+
+        <!-- 3. GAME VIEW -->
+        <div id="view-game" class="hidden flex-1 flex flex-col relative">
+            <!-- Progress / Timer -->
+            <div class="w-full bg-slate-200 rounded-full h-2 mb-6 overflow-hidden">
+                <div id="timer-bar" class="bg-indigo-500 h-2 rounded-full transition-all duration-1000 ease-linear" style="width: 100%"></div>
+            </div>
+
+            <div class="flex justify-between items-end mb-4">
+                <div class="text-sm font-bold text-slate-400">SCORE</div>
+                <div id="score-display" class="text-4xl font-black text-slate-800">0</div>
+            </div>
+
+            <!-- Game Stage Area -->
+            <div id="game-stage" class="flex-1 game-card flex flex-col justify-center items-center p-4 mb-6 relative overflow-hidden">
+                <!-- Instruction Overlay (Fades out) -->
+                <div id="instruction-overlay" class="absolute inset-0 bg-white/90 z-20 flex flex-col justify-center items-center text-center p-6">
+                    <h3 class="text-xl font-bold mb-2 text-indigo-600">ルール</h3>
+                    <p id="game-rule-text" class="font-bold text-slate-800 mb-6 text-lg">...</p>
+                    <div class="text-3xl font-bold text-slate-300 animate-pulse">Ready...</div>
+                </div>
+
+                <!-- Main Stimulus -->
+                <div id="stimulus-container" class="text-center z-10 w-full">
+                    <!-- Dynamic Content injected by JS -->
+                </div>
+            </div>
+
+            <!-- Controls Area -->
+            <div id="controls-area" class="grid grid-cols-2 gap-4 h-32">
+                <!-- Dynamic Buttons injected by JS -->
+            </div>
+        </div>
+
+        <!-- 4. RESULT VIEW -->
+        <div id="view-result" class="hidden flex-1 flex flex-col justify-center items-center animate-pop">
+            <div class="text-center mb-8">
+                <div class="text-6xl mb-2">🎉</div>
+                <h2 class="text-2xl font-bold text-slate-800">Training Complete!</h2>
+                <p class="text-sm text-slate-500">お疲れ様でした。脳が活性化されました。</p>
+            </div>
+
+            <div class="game-card w-full p-8 text-center mb-8">
+                <div class="text-sm text-slate-400 uppercase tracking-wider mb-2">Today's Score</div>
+                <div id="final-score" class="text-6xl font-black text-indigo-600 mb-4">0</div>
+                <div class="w-full border-t border-slate-100 my-4"></div>
+                <p id="feedback-text" class="font-bold text-slate-700">素晴らしい集中力です！</p>
+            </div>
+
+            <button onclick="liff.closeWindow()" class="w-full bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all btn-press mb-3">
+                閉じる
+            </button>
+            <p class="text-xs text-slate-400 text-center">また明日チャレンジしてください。</p>
+        </div>
+
+        <!-- 5. LIMIT REACHED VIEW -->
+        <div id="view-limit" class="hidden flex-1 flex flex-col justify-center items-center animate-pop">
+            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                <i class="fa-solid fa-check text-4xl text-green-500"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">本日は完了済みです</h2>
+            <p class="text-slate-500 text-center mb-8 px-8">
+                脳の定着のために休息も重要です。<br>
+                また明日、新しい課題でお待ちしています。
+            </p>
+            <div class="text-xs bg-white p-4 rounded-lg shadow-sm text-slate-400 border border-slate-100">
+                <i class="fa-solid fa-calendar-check mr-2"></i> 次回: <span id="next-date">明日</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- LIFF SDK Loading -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+    <!-- Main Application Script -->
+    <script>
+        /**
+         * App State & Configuration
+         */
+        const AppConfig = {
+            gameDuration: 30, // seconds
+            storageKey: 'neuro_daily_last_played',
+        };
+
+        const GameData = [
+            {
+                id: 'stroop',
+                title: '色彩判断スイッチ',
+                desc: '「文字の色」または「文字の意味」を瞬時に判断してください。',
+                rule: '指示に従ってボタンを押せ！',
+                type: 'choice'
+            },
+            {
+                id: 'direction',
+                title: '空間反転ナビ',
+                desc: '矢印の向きと逆、または同じ方向を指示通りに入力してください。',
+                rule: '「逆」なら反対、「正」ならそのまま！',
+                type: 'choice'
+            },
+            {
+                id: 'math_reflex',
+                title: '偶数・奇数ソーター',
+                desc: '表示される数字が偶数か奇数かを瞬時に仕分けてください。',
+                rule: '偶数か奇数か判断せよ！',
+                type: 'choice'
+            }
+        ];
+
+        const app = {
+            state: {
+                currentView: 'loading',
+                score: 0,
+                timeLeft: AppConfig.gameDuration,
+                isPlaying: false,
+                todayGameIndex: 0,
+                timerInterval: null,
+                currentQuestion: null
+            },
+
+            // --- Initialization ---
+            init: async function() {
+                this.updateDateDisplay();
+                
+                // Determine today's game based on date hash
+                const today = new Date();
+                // Simple hash: Sum of year+month+date % game count
+                const dateHash = today.getFullYear() + today.getMonth() + today.getDate();
+                this.state.todayGameIndex = dateHash % GameData.length;
+
+                // Check LocalStorage for daily limit
+                const lastPlayed = localStorage.getItem(AppConfig.storageKey);
+                const todayStr = today.toDateString();
+
+                if (lastPlayed === todayStr) {
+                    this.switchView('limit');
+                } else {
+                    this.setupHome();
+                    this.switchView('home');
+                }
+            },
+
+            updateDateDisplay: function() {
+                const now = new Date();
+                const options = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
+                document.getElementById('date-display').innerText = now.toLocaleDateString('ja-JP', options);
+                
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                document.getElementById('next-date').innerText = tomorrow.toLocaleDateString('ja-JP', {month: '2-digit', day: '2-digit'});
+            },
+
+            setupHome: function() {
+                const game = GameData[this.state.todayGameIndex];
+                document.getElementById('daily-title').innerText = game.title;
+                document.getElementById('daily-desc').innerText = game.desc;
+                document.getElementById('game-rule-text').innerText = game.rule;
+            },
+
+            // --- View Management ---
+            switchView: function(viewName) {
+                ['loading', 'home', 'game', 'result', 'limit'].forEach(v => {
+                    const el = document.getElementById(`view-${v}`);
+                    if (v === viewName) {
+                        el.classList.remove('hidden');
+                        if(v !== 'loading') el.classList.add('flex');
+                    } else {
+                        el.classList.add('hidden');
+                        el.classList.remove('flex');
+                    }
+                });
+                this.state.currentView = viewName;
+            },
+
+            // --- Game Logic ---
+            startGame: function() {
+                this.switchView('game');
+                this.state.score = 0;
+                this.state.timeLeft = AppConfig.gameDuration;
+                this.updateScoreUI();
+                
+                // Show instruction overlay for 2 seconds then start
+                const overlay = document.getElementById('instruction-overlay');
+                overlay.style.display = 'flex';
+                
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    this.state.isPlaying = true;
+                    this.startTimer();
+                    this.nextRound();
+                }, 2000);
+            },
+
+            startTimer: function() {
+                const timerBar = document.getElementById('timer-bar');
+                timerBar.style.width = '100%';
+                
+                this.state.timerInterval = setInterval(() => {
+                    this.state.timeLeft--;
+                    const pct = (this.state.timeLeft / AppConfig.gameDuration) * 100;
+                    timerBar.style.width = `${pct}%`;
+                    
+                    if (this.state.timeLeft <= 10) {
+                        timerBar.classList.remove('bg-indigo-500');
+                        timerBar.classList.add('bg-red-500');
+                    }
+
+                    if (this.state.timeLeft <= 0) {
+                        this.endGame();
+                    }
+                }, 1000);
+            },
+
+            nextRound: function() {
+                if (!this.state.isPlaying) return;
+                
+                const gameType = GameData[this.state.todayGameIndex].id;
+                const stage = document.getElementById('stimulus-container');
+                const controls = document.getElementById('controls-area');
+                
+                // Clear previous
+                stage.innerHTML = '';
+                controls.innerHTML = '';
+
+                let question = {};
+
+                // --- LOGIC FOR DIFFERENT GAMES ---
+                
+                // Game 1: Stroop (Color vs Text)
+                if (gameType === 'stroop') {
+                    const colors = [
+                        { name: 'あか', code: 'text-red-500', bg: 'bg-red-100', val: 'red' },
+                        { name: 'あお', code: 'text-blue-500', bg: 'bg-blue-100', val: 'blue' },
+                        { name: 'みどり', code: 'text-green-500', bg: 'bg-green-100', val: 'green' },
+                        { name: 'きいろ', code: 'text-yellow-500', bg: 'bg-yellow-100', val: 'yellow' }
+                    ];
+                    
+                    // Decide rule: Answer Color or Answer Text?
+                    const mode = Math.random() > 0.5 ? 'color' : 'text';
+                    const targetText = colors[Math.floor(Math.random() * colors.length)];
+                    const targetColor = colors[Math.floor(Math.random() * colors.length)]; // Can be conflicting
+                    
+                    const correctAnswer = mode === 'color' ? targetColor.val : targetText.val;
+                    
+                    // Render Stimulus
+                    stage.innerHTML = `
+                        <div class="text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">
+                            ${mode === 'color' ? '文字の色は？' : '文字の読みは？'}
+                        </div>
+                        <div class="text-6xl font-black ${targetColor.code} transition-all transform scale-100">
+                            ${targetText.name}
+                        </div>
+                    `;
+
+                    // Render Buttons (Shuffle options)
+                    const options = [...colors].sort(() => Math.random() - 0.5);
+                    options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = `${opt.bg} ${opt.code} font-bold rounded-xl text-lg shadow-sm active:scale-95 transition-transform flex items-center justify-center`;
+                        btn.innerText = opt.name;
+                        btn.onclick = () => this.handleAnswer(opt.val === correctAnswer);
+                        controls.appendChild(btn);
+                    });
+                }
+
+                // Game 2: Direction (Reverse Logic)
+                else if (gameType === 'direction') {
+                    const dirs = ['up', 'down', 'left', 'right'];
+                    const icons = { up: 'fa-arrow-up', down: 'fa-arrow-down', left: 'fa-arrow-left', right: 'fa-arrow-right' };
+                    const jp = { up: '上', down: '下', left: '左', right: '右' };
+                    
+                    const actualDir = dirs[Math.floor(Math.random() * dirs.length)];
+                    const isReverse = Math.random() > 0.5;
+                    
+                    // Calculate correct answer
+                    let correctDir = actualDir;
+                    if (isReverse) {
+                        if (actualDir === 'up') correctDir = 'down';
+                        if (actualDir === 'down') correctDir = 'up';
+                        if (actualDir === 'left') correctDir = 'right';
+                        if (actualDir === 'right') correctDir = 'left';
+                    }
+
+                    stage.innerHTML = `
+                        <div class="text-sm font-bold ${isReverse ? 'text-red-500' : 'text-blue-500'} mb-4 uppercase tracking-widest">
+                            ${isReverse ? '★ 逆を向け ★' : 'そのまま向け'}
+                        </div>
+                        <div class="text-8xl text-slate-800">
+                            <i class="fa-solid ${icons[actualDir]}"></i>
+                        </div>
+                    `;
+
+                    dirs.forEach(d => {
+                        const btn = document.createElement('button');
+                        btn.className = `bg-white border-2 border-slate-200 text-slate-600 font-bold rounded-xl text-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center`;
+                        btn.innerHTML = `<i class="fa-solid ${icons[d]}"></i>`;
+                        btn.onclick = () => this.handleAnswer(d === correctDir);
+                        controls.appendChild(btn);
+                    });
+                }
+
+                // Game 3: Math Reflex (Even/Odd)
+                else if (gameType === 'math_reflex') {
+                    const num = Math.floor(Math.random() * 99) + 1;
+                    const isEven = num % 2 === 0;
+                    
+                    stage.innerHTML = `
+                        <div class="text-sm font-bold text-slate-400 mb-4">数字はどっち？</div>
+                        <div class="text-8xl font-black text-indigo-600 font-mono">
+                            ${num}
+                        </div>
+                    `;
+
+                    // Buttons
+                    const btnEven = document.createElement('button');
+                    btnEven.className = `bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xl shadow-sm active:scale-95 py-4`;
+                    btnEven.innerText = "偶数 (2,4,6...)";
+                    btnEven.onclick = () => this.handleAnswer(isEven);
+
+                    const btnOdd = document.createElement('button');
+                    btnOdd.className = `bg-orange-100 text-orange-700 font-bold rounded-xl text-xl shadow-sm active:scale-95 py-4`;
+                    btnOdd.innerText = "奇数 (1,3,5...)";
+                    btnOdd.onclick = () => this.handleAnswer(!isEven);
+
+                    controls.appendChild(btnEven);
+                    controls.appendChild(btnOdd);
+                }
+            },
+
+            handleAnswer: function(isCorrect) {
+                if (!this.state.isPlaying) return;
+
+                const stage = document.getElementById('game-stage');
+
+                if (isCorrect) {
+                    this.state.score += 10;
+                    // Visual feedback
+                    stage.classList.add('animate-pulse-green');
+                    setTimeout(() => stage.classList.remove('animate-pulse-green'), 500);
+                } else {
+                    // Penalty? Or just shake
+                    stage.classList.add('animate-shake');
+                    setTimeout(() => stage.classList.remove('animate-shake'), 300);
+                    // Optional: Time penalty
+                    // this.state.timeLeft = Math.max(0, this.state.timeLeft - 2); 
+                }
+                
+                this.updateScoreUI();
+                this.nextRound();
+            },
+
+            updateScoreUI: function() {
+                document.getElementById('score-display').innerText = this.state.score;
+            },
+
+            endGame: function() {
+                this.state.isPlaying = false;
+                clearInterval(this.state.timerInterval);
+                
+                // Save Played Status
+                const todayStr = new Date().toDateString();
+                localStorage.setItem(AppConfig.storageKey, todayStr);
+
+                // Show Result
+                document.getElementById('final-score').innerText = this.state.score;
+                
+                let feedback = "";
+                if (this.state.score > 250) feedback = "神レベルの脳処理速度です！";
+                else if (this.state.score > 150) feedback = "素晴らしい！脳が若返っています。";
+                else if (this.state.score > 50) feedback = "ナイスファイト！継続が力なり。";
+                else feedback = "ドンマイ！明日はもっといけます。";
+                
+                document.getElementById('feedback-text').innerText = feedback;
+                
+                this.switchView('result');
+            }
+        };
+
+        // --- LIFF & Boot Logic ---
+        
+        window.onload = function() {
+            // Placeholder logic to prevent crash if LIFF ID is invalid in preview
+            const liffId = "LIFF_ID_PLACEHOLDER"; 
+
+            // Initialize App Logic first (Visuals)
+            
+            // Initialize LIFF
+            if (typeof liff !== 'undefined') {
+                liff.init({ liffId: liffId })
+                    .then(() => {
+                        console.log("LIFF initialized");
+                        if (!liff.isLoggedIn() && liff.isInClient()) {
+                            liff.login();
+                        }
+                    })
+                    .catch((err) => {
+                        console.warn("LIFF Init failed (Expected in preview mode):", err);
+                        // Continue anyway for web preview
+                    })
+                    .finally(() => {
+                        // Start App after init attempt
+                        setTimeout(() => app.init(), 500);
+                    });
+            } else {
+                console.error("LIFF SDK not found");
+                app.init();
+            }
+        };
+
+    </script>
+</body>
+</html>
