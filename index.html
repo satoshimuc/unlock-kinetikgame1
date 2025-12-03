@@ -2,529 +2,433 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Daily Neuro Training</title>
-    <!-- Tailwind CSS for Modern UI -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Bouquet</title>
+    <!-- LIFF SDKの読み込み (必須要件1) -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     
+    <!-- Google Fonts: 読みやすさと高級感を演出 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            /* 写真から抽出したカラーパレット */
+            --primary-pink: #F4C4C4; /* ラッピングのピンク */
+            --deep-pink: #E08A8A;
+            --leaf-green: #A8C686; /* スズランの葉の色 */
+            --text-color: #5A4A4A;
+            --bg-color: #FDFBF7;
+            --white: #FFFFFF;
+            --accent-gold: #D4AF37;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background-color: #f0f4f8;
-            touch-action: manipulation; /* Prevent double-tap zoom */
-            user-select: none;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Custom Animations */
-        @keyframes popIn {
-            0% { transform: scale(0.9); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        /* ヘッダー */
+        header {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
-        .animate-pop { animation: popIn 0.3s ease-out forwards; }
-        .animate-shake { animation: shake 0.3s ease-in-out; }
-        .animate-pulse-green { animation: pulse-green 0.5s; }
-
-        .game-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        h1 {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            letter-spacing: 0.05em;
         }
 
-        /* Hide scrollbar for clean UI */
-        ::-webkit-scrollbar {
+        h1 span {
+            color: var(--deep-pink);
+        }
+
+        /* メインコンテナ */
+        .container {
+            width: 100%;
+            max-width: 480px; /* スマホ最適な幅 */
+            padding: 24px;
+            flex: 1;
+        }
+
+        /* ヒーローエリア */
+        .hero {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .hero p {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 8px;
+        }
+
+        /* フォームデザイン */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 1rem;
+            background-color: var(--white);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--leaf-green);
+            box-shadow: 0 0 0 3px rgba(168, 198, 134, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* 送信ボタン */
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-pink), var(--deep-pink));
+            color: var(--white);
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(224, 138, 138, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(224, 138, 138, 0.4);
+        }
+
+        /* 結果表示エリア（カード風） */
+        #result-area {
+            display: none; /* 初期状態は非表示 */
+            margin-top: 40px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .gift-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+            position: relative;
+            border: 1px solid #eee;
+            overflow: hidden;
+        }
+
+        /* ピンクのクレープ紙風装飾 */
+        .gift-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: repeating-linear-gradient(
+                45deg,
+                var(--primary-pink),
+                var(--primary-pink) 10px,
+                #fff 10px,
+                #fff 20px
+            );
+        }
+
+        .flower-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .card-title {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            font-size: 1.2rem;
+            color: var(--leaf-green);
+            margin-bottom: 24px;
+        }
+
+        .message-box {
+            background-color: #fff;
+            border: 1px dashed var(--primary-pink);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Zen Maru Gothic', sans-serif; /* 手書き風フォント */
+            text-align: left;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .message-content {
+            white-space: pre-wrap;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .message-from {
+            text-align: right;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .share-btn {
+            background-color: #06C755; /* LINE Green */
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* アニメーション */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* ローディング */
+        .loading {
+            text-align: center;
             display: none;
-        }
-
-        /* Button Press Effect */
-        .btn-press:active {
-            transform: scale(0.95);
         }
     </style>
 </head>
-<body class="h-screen w-full text-slate-700 flex flex-col items-center justify-center overflow-hidden relative">
+<body>
 
-    <!-- Background Elements -->
-    <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-        <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div class="absolute top-[-10%] right-[-10%] w-64 h-64 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div class="absolute bottom-[-20%] left-[20%] w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-    </div>
+    <header>
+        <h1>Book <span>Bouquet</span></h1>
+    </header>
 
-    <!-- MAIN APP CONTAINER -->
-    <div id="app" class="w-full max-w-md h-full flex flex-col relative px-4 py-6">
-        
-        <!-- Header -->
-        <header class="flex justify-between items-center mb-6">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-brain text-indigo-600 text-2xl"></i>
-                <h1 class="text-xl font-bold tracking-tight text-slate-800">NeuroDaily</h1>
+    <div class="container">
+        <!-- 入力フォームエリア -->
+        <div id="input-area">
+            <div class="hero">
+                <p>絵本とお花を、ブーケのように。<br>大切な人へ物語を贈りましょう。</p>
             </div>
-            <div class="text-xs font-medium bg-white px-3 py-1 rounded-full shadow-sm text-slate-500">
-                <span id="date-display">2023.01.01</span>
-            </div>
-        </header>
 
-        <!-- VIEWS -->
+            <form id="bouquet-form">
+                <div class="form-group">
+                    <label for="book-select">絵本を選ぶ</label>
+                    <select id="book-select" required>
+                        <option value="" disabled selected>選択してください</option>
+                        <option value="Life - ライフ">Life - ライフ (くすのきしげのり)</option>
+                        <option value="100万回生きたねこ">100万回生きたねこ</option>
+                        <option value="星の王子さま">星の王子さま</option>
+                        <option value="はらぺこあおむし">はらぺこあおむし</option>
+                    </select>
+                </div>
 
-        <!-- 1. LOADING VIEW -->
-        <div id="view-loading" class="flex-1 flex flex-col justify-center items-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-            <p class="text-sm text-slate-500">ニューロン接続中...</p>
+                <div class="form-group">
+                    <label for="flower-select">お花（栞）を選ぶ</label>
+                    <select id="flower-select" required>
+                        <option value="lily">スズラン (純粋・幸福の再来)</option>
+                        <option value="mimosa">ミモザ (感謝・友情)</option>
+                        <option value="rose">ピンクローズ (上品・愛の誓い)</option>
+                        <option value="lavender">ラベンダー (期待・沈黙)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="recipient">贈り相手のお名前</label>
+                    <input type="text" id="recipient" placeholder="例：お母さん、花子さん" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">メッセージ</label>
+                    <textarea id="message" placeholder="ブーケに添える言葉を入力してください...&#10;例：お誕生日おめでとう！いつまでも元気でいてね。" required></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">ブーケを作成する</button>
+            </form>
         </div>
 
-        <!-- 2. HOME VIEW (Start) -->
-        <div id="view-home" class="hidden flex-1 flex flex-col justify-center items-center animate-pop">
-            <div class="text-center mb-8">
-                <div class="inline-block p-4 bg-indigo-100 rounded-full mb-4">
-                    <i class="fa-solid fa-bolt text-indigo-600 text-4xl"></i>
+        <!-- ローディング表示 -->
+        <div id="loading" class="loading">
+            <p>心を込めて包んでいます...</p>
+        </div>
+
+        <!-- 結果表示エリア -->
+        <div id="result-area">
+            <div class="gift-card">
+                <div id="flower-display" class="flower-icon">🌿</div>
+                <h2 class="card-title">Book Bouquet Gift</h2>
+                
+                <p style="margin-bottom: 10px; font-size: 0.9rem;">
+                    <span id="result-book" style="font-weight:bold;"></span> を<br>
+                    お届けしました。
+                </p>
+
+                <div class="message-box">
+                    <div id="result-recipient" style="font-size: 0.9rem; margin-bottom: 5px; font-weight: bold;"></div>
+                    <div id="result-message" class="message-content"></div>
+                    <div class="message-from">From あなた</div>
                 </div>
-                <h2 class="text-2xl font-bold mb-2">今日の脳トレ</h2>
-                <p class="text-slate-500 text-sm px-6">
-                    ライフキネティック理論に基づく<br>
-                    1日1回の短期集中トレーニング。
+
+                <button class="share-btn" onclick="shareLine()">
+                    LINEでシェアする
+                </button>
+                
+                <p style="margin-top:20px; font-size:0.8rem; color:#aaa; cursor:pointer;" onclick="resetForm()">
+                    もう一度つくる
                 </p>
             </div>
-
-            <div class="game-card w-full p-6 mb-8 border-l-4 border-indigo-500">
-                <h3 id="daily-title" class="text-lg font-bold mb-1 text-indigo-900">Task Loading...</h3>
-                <p id="daily-desc" class="text-sm text-slate-600 mb-4">...</p>
-                <div class="flex items-center text-xs text-slate-400 gap-4">
-                    <span><i class="fa-regular fa-clock mr-1"></i> 30秒</span>
-                    <span><i class="fa-solid fa-trophy mr-1"></i> スコアアタック</span>
-                </div>
-            </div>
-
-            <button onclick="app.startGame()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transition-all btn-press flex items-center justify-center gap-2">
-                <i class="fa-solid fa-play"></i> トレーニング開始
-            </button>
-            <p class="text-xs text-center text-slate-400 mt-4">※音は出ません</p>
         </div>
-
-        <!-- 3. GAME VIEW -->
-        <div id="view-game" class="hidden flex-1 flex flex-col relative">
-            <!-- Progress / Timer -->
-            <div class="w-full bg-slate-200 rounded-full h-2 mb-6 overflow-hidden">
-                <div id="timer-bar" class="bg-indigo-500 h-2 rounded-full transition-all duration-1000 ease-linear" style="width: 100%"></div>
-            </div>
-
-            <div class="flex justify-between items-end mb-4">
-                <div class="text-sm font-bold text-slate-400">SCORE</div>
-                <div id="score-display" class="text-4xl font-black text-slate-800">0</div>
-            </div>
-
-            <!-- Game Stage Area -->
-            <div id="game-stage" class="flex-1 game-card flex flex-col justify-center items-center p-4 mb-6 relative overflow-hidden">
-                <!-- Instruction Overlay (Fades out) -->
-                <div id="instruction-overlay" class="absolute inset-0 bg-white/90 z-20 flex flex-col justify-center items-center text-center p-6">
-                    <h3 class="text-xl font-bold mb-2 text-indigo-600">ルール</h3>
-                    <p id="game-rule-text" class="font-bold text-slate-800 mb-6 text-lg">...</p>
-                    <div class="text-3xl font-bold text-slate-300 animate-pulse">Ready...</div>
-                </div>
-
-                <!-- Main Stimulus -->
-                <div id="stimulus-container" class="text-center z-10 w-full">
-                    <!-- Dynamic Content injected by JS -->
-                </div>
-            </div>
-
-            <!-- Controls Area -->
-            <div id="controls-area" class="grid grid-cols-2 gap-4 h-32">
-                <!-- Dynamic Buttons injected by JS -->
-            </div>
-        </div>
-
-        <!-- 4. RESULT VIEW -->
-        <div id="view-result" class="hidden flex-1 flex flex-col justify-center items-center animate-pop">
-            <div class="text-center mb-8">
-                <div class="text-6xl mb-2">🎉</div>
-                <h2 class="text-2xl font-bold text-slate-800">Training Complete!</h2>
-                <p class="text-sm text-slate-500">お疲れ様でした。脳が活性化されました。</p>
-            </div>
-
-            <div class="game-card w-full p-8 text-center mb-8">
-                <div class="text-sm text-slate-400 uppercase tracking-wider mb-2">Today's Score</div>
-                <div id="final-score" class="text-6xl font-black text-indigo-600 mb-4">0</div>
-                <div class="w-full border-t border-slate-100 my-4"></div>
-                <p id="feedback-text" class="font-bold text-slate-700">素晴らしい集中力です！</p>
-            </div>
-
-            <button onclick="liff.closeWindow()" class="w-full bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all btn-press mb-3">
-                閉じる
-            </button>
-            <p class="text-xs text-slate-400 text-center">また明日チャレンジしてください。</p>
-        </div>
-
-        <!-- 5. LIMIT REACHED VIEW -->
-        <div id="view-limit" class="hidden flex-1 flex flex-col justify-center items-center animate-pop">
-            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                <i class="fa-solid fa-check text-4xl text-green-500"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-slate-800 mb-2">本日は完了済みです</h2>
-            <p class="text-slate-500 text-center mb-8 px-8">
-                脳の定着のために休息も重要です。<br>
-                また明日、新しい課題でお待ちしています。
-            </p>
-            <div class="text-xs bg-white p-4 rounded-lg shadow-sm text-slate-400 border border-slate-100">
-                <i class="fa-solid fa-calendar-check mr-2"></i> 次回: <span id="next-date">明日</span>
-            </div>
-        </div>
-
     </div>
 
-    <!-- LIFF SDK Loading -->
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
-    <!-- Main Application Script -->
     <script>
-        /**
-         * App State & Configuration
-         */
-        const AppConfig = {
-            gameDuration: 30, // seconds
-            storageKey: 'neuro_daily_last_played',
+        // DOM要素の取得
+        const form = document.getElementById('bouquet-form');
+        const inputArea = document.getElementById('input-area');
+        const resultArea = document.getElementById('result-area');
+        const loading = document.getElementById('loading');
+
+        // 花のアイコンマッピング
+        const flowerIcons = {
+            'lily': '🌿', // スズランのイメージ（絵文字で代用）
+            'mimosa': '🌼',
+            'rose': '🌹',
+            'lavender': '🪻'
         };
-
-        const GameData = [
-            {
-                id: 'stroop',
-                title: '色彩判断スイッチ',
-                desc: '「文字の色」または「文字の意味」を瞬時に判断してください。',
-                rule: '指示に従ってボタンを押せ！',
-                type: 'choice'
-            },
-            {
-                id: 'direction',
-                title: '空間反転ナビ',
-                desc: '矢印の向きと逆、または同じ方向を指示通りに入力してください。',
-                rule: '「逆」なら反対、「正」ならそのまま！',
-                type: 'choice'
-            },
-            {
-                id: 'math_reflex',
-                title: '偶数・奇数ソーター',
-                desc: '表示される数字が偶数か奇数かを瞬時に仕分けてください。',
-                rule: '偶数か奇数か判断せよ！',
-                type: 'choice'
-            }
-        ];
-
-        const app = {
-            state: {
-                currentView: 'loading',
-                score: 0,
-                timeLeft: AppConfig.gameDuration,
-                isPlaying: false,
-                todayGameIndex: 0,
-                timerInterval: null,
-                currentQuestion: null
-            },
-
-            // --- Initialization ---
-            init: async function() {
-                this.updateDateDisplay();
-                
-                // Determine today's game based on date hash
-                const today = new Date();
-                // Simple hash: Sum of year+month+date % game count
-                const dateHash = today.getFullYear() + today.getMonth() + today.getDate();
-                this.state.todayGameIndex = dateHash % GameData.length;
-
-                // Check LocalStorage for daily limit
-                const lastPlayed = localStorage.getItem(AppConfig.storageKey);
-                const todayStr = today.toDateString();
-
-                if (lastPlayed === todayStr) {
-                    this.switchView('limit');
-                } else {
-                    this.setupHome();
-                    this.switchView('home');
-                }
-            },
-
-            updateDateDisplay: function() {
-                const now = new Date();
-                const options = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
-                document.getElementById('date-display').innerText = now.toLocaleDateString('ja-JP', options);
-                
-                const tomorrow = new Date(now);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                document.getElementById('next-date').innerText = tomorrow.toLocaleDateString('ja-JP', {month: '2-digit', day: '2-digit'});
-            },
-
-            setupHome: function() {
-                const game = GameData[this.state.todayGameIndex];
-                document.getElementById('daily-title').innerText = game.title;
-                document.getElementById('daily-desc').innerText = game.desc;
-                document.getElementById('game-rule-text').innerText = game.rule;
-            },
-
-            // --- View Management ---
-            switchView: function(viewName) {
-                ['loading', 'home', 'game', 'result', 'limit'].forEach(v => {
-                    const el = document.getElementById(`view-${v}`);
-                    if (v === viewName) {
-                        el.classList.remove('hidden');
-                        if(v !== 'loading') el.classList.add('flex');
-                    } else {
-                        el.classList.add('hidden');
-                        el.classList.remove('flex');
-                    }
-                });
-                this.state.currentView = viewName;
-            },
-
-            // --- Game Logic ---
-            startGame: function() {
-                this.switchView('game');
-                this.state.score = 0;
-                this.state.timeLeft = AppConfig.gameDuration;
-                this.updateScoreUI();
-                
-                // Show instruction overlay for 2 seconds then start
-                const overlay = document.getElementById('instruction-overlay');
-                overlay.style.display = 'flex';
-                
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    this.state.isPlaying = true;
-                    this.startTimer();
-                    this.nextRound();
-                }, 2000);
-            },
-
-            startTimer: function() {
-                const timerBar = document.getElementById('timer-bar');
-                timerBar.style.width = '100%';
-                
-                this.state.timerInterval = setInterval(() => {
-                    this.state.timeLeft--;
-                    const pct = (this.state.timeLeft / AppConfig.gameDuration) * 100;
-                    timerBar.style.width = `${pct}%`;
-                    
-                    if (this.state.timeLeft <= 10) {
-                        timerBar.classList.remove('bg-indigo-500');
-                        timerBar.classList.add('bg-red-500');
-                    }
-
-                    if (this.state.timeLeft <= 0) {
-                        this.endGame();
-                    }
-                }, 1000);
-            },
-
-            nextRound: function() {
-                if (!this.state.isPlaying) return;
-                
-                const gameType = GameData[this.state.todayGameIndex].id;
-                const stage = document.getElementById('stimulus-container');
-                const controls = document.getElementById('controls-area');
-                
-                // Clear previous
-                stage.innerHTML = '';
-                controls.innerHTML = '';
-
-                let question = {};
-
-                // --- LOGIC FOR DIFFERENT GAMES ---
-                
-                // Game 1: Stroop (Color vs Text)
-                if (gameType === 'stroop') {
-                    const colors = [
-                        { name: 'あか', code: 'text-red-500', bg: 'bg-red-100', val: 'red' },
-                        { name: 'あお', code: 'text-blue-500', bg: 'bg-blue-100', val: 'blue' },
-                        { name: 'みどり', code: 'text-green-500', bg: 'bg-green-100', val: 'green' },
-                        { name: 'きいろ', code: 'text-yellow-500', bg: 'bg-yellow-100', val: 'yellow' }
-                    ];
-                    
-                    // Decide rule: Answer Color or Answer Text?
-                    const mode = Math.random() > 0.5 ? 'color' : 'text';
-                    const targetText = colors[Math.floor(Math.random() * colors.length)];
-                    const targetColor = colors[Math.floor(Math.random() * colors.length)]; // Can be conflicting
-                    
-                    const correctAnswer = mode === 'color' ? targetColor.val : targetText.val;
-                    
-                    // Render Stimulus
-                    stage.innerHTML = `
-                        <div class="text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">
-                            ${mode === 'color' ? '文字の色は？' : '文字の読みは？'}
-                        </div>
-                        <div class="text-6xl font-black ${targetColor.code} transition-all transform scale-100">
-                            ${targetText.name}
-                        </div>
-                    `;
-
-                    // Render Buttons (Shuffle options)
-                    const options = [...colors].sort(() => Math.random() - 0.5);
-                    options.forEach(opt => {
-                        const btn = document.createElement('button');
-                        btn.className = `${opt.bg} ${opt.code} font-bold rounded-xl text-lg shadow-sm active:scale-95 transition-transform flex items-center justify-center`;
-                        btn.innerText = opt.name;
-                        btn.onclick = () => this.handleAnswer(opt.val === correctAnswer);
-                        controls.appendChild(btn);
-                    });
-                }
-
-                // Game 2: Direction (Reverse Logic)
-                else if (gameType === 'direction') {
-                    const dirs = ['up', 'down', 'left', 'right'];
-                    const icons = { up: 'fa-arrow-up', down: 'fa-arrow-down', left: 'fa-arrow-left', right: 'fa-arrow-right' };
-                    const jp = { up: '上', down: '下', left: '左', right: '右' };
-                    
-                    const actualDir = dirs[Math.floor(Math.random() * dirs.length)];
-                    const isReverse = Math.random() > 0.5;
-                    
-                    // Calculate correct answer
-                    let correctDir = actualDir;
-                    if (isReverse) {
-                        if (actualDir === 'up') correctDir = 'down';
-                        if (actualDir === 'down') correctDir = 'up';
-                        if (actualDir === 'left') correctDir = 'right';
-                        if (actualDir === 'right') correctDir = 'left';
-                    }
-
-                    stage.innerHTML = `
-                        <div class="text-sm font-bold ${isReverse ? 'text-red-500' : 'text-blue-500'} mb-4 uppercase tracking-widest">
-                            ${isReverse ? '★ 逆を向け ★' : 'そのまま向け'}
-                        </div>
-                        <div class="text-8xl text-slate-800">
-                            <i class="fa-solid ${icons[actualDir]}"></i>
-                        </div>
-                    `;
-
-                    dirs.forEach(d => {
-                        const btn = document.createElement('button');
-                        btn.className = `bg-white border-2 border-slate-200 text-slate-600 font-bold rounded-xl text-2xl shadow-sm active:scale-95 transition-transform flex items-center justify-center`;
-                        btn.innerHTML = `<i class="fa-solid ${icons[d]}"></i>`;
-                        btn.onclick = () => this.handleAnswer(d === correctDir);
-                        controls.appendChild(btn);
-                    });
-                }
-
-                // Game 3: Math Reflex (Even/Odd)
-                else if (gameType === 'math_reflex') {
-                    const num = Math.floor(Math.random() * 99) + 1;
-                    const isEven = num % 2 === 0;
-                    
-                    stage.innerHTML = `
-                        <div class="text-sm font-bold text-slate-400 mb-4">数字はどっち？</div>
-                        <div class="text-8xl font-black text-indigo-600 font-mono">
-                            ${num}
-                        </div>
-                    `;
-
-                    // Buttons
-                    const btnEven = document.createElement('button');
-                    btnEven.className = `bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xl shadow-sm active:scale-95 py-4`;
-                    btnEven.innerText = "偶数 (2,4,6...)";
-                    btnEven.onclick = () => this.handleAnswer(isEven);
-
-                    const btnOdd = document.createElement('button');
-                    btnOdd.className = `bg-orange-100 text-orange-700 font-bold rounded-xl text-xl shadow-sm active:scale-95 py-4`;
-                    btnOdd.innerText = "奇数 (1,3,5...)";
-                    btnOdd.onclick = () => this.handleAnswer(!isEven);
-
-                    controls.appendChild(btnEven);
-                    controls.appendChild(btnOdd);
-                }
-            },
-
-            handleAnswer: function(isCorrect) {
-                if (!this.state.isPlaying) return;
-
-                const stage = document.getElementById('game-stage');
-
-                if (isCorrect) {
-                    this.state.score += 10;
-                    // Visual feedback
-                    stage.classList.add('animate-pulse-green');
-                    setTimeout(() => stage.classList.remove('animate-pulse-green'), 500);
-                } else {
-                    // Penalty? Or just shake
-                    stage.classList.add('animate-shake');
-                    setTimeout(() => stage.classList.remove('animate-shake'), 300);
-                    // Optional: Time penalty
-                    // this.state.timeLeft = Math.max(0, this.state.timeLeft - 2); 
-                }
-                
-                this.updateScoreUI();
-                this.nextRound();
-            },
-
-            updateScoreUI: function() {
-                document.getElementById('score-display').innerText = this.state.score;
-            },
-
-            endGame: function() {
-                this.state.isPlaying = false;
-                clearInterval(this.state.timerInterval);
-                
-                // Save Played Status
-                const todayStr = new Date().toDateString();
-                localStorage.setItem(AppConfig.storageKey, todayStr);
-
-                // Show Result
-                document.getElementById('final-score').innerText = this.state.score;
-                
-                let feedback = "";
-                if (this.state.score > 250) feedback = "神レベルの脳処理速度です！";
-                else if (this.state.score > 150) feedback = "素晴らしい！脳が若返っています。";
-                else if (this.state.score > 50) feedback = "ナイスファイト！継続が力なり。";
-                else feedback = "ドンマイ！明日はもっといけます。";
-                
-                document.getElementById('feedback-text').innerText = feedback;
-                
-                this.switchView('result');
-            }
-        };
-
-        // --- LIFF & Boot Logic ---
         
-        window.onload = function() {
-            // Placeholder logic to prevent crash if LIFF ID is invalid in preview
-            const liffId = "2008614777-Z7PXQRbA"; 
+        // LIFF初期化状態フラグ
+        let isLiffInitialized = false;
 
-            // Initialize App Logic first (Visuals)
-            
-            // Initialize LIFF
-            if (typeof liff !== 'undefined') {
-                liff.init({ liffId: liffId })
-                    .then(() => {
-                        console.log("LIFF initialized");
-                        if (!liff.isLoggedIn() && liff.isInClient()) {
-                            liff.login();
-                        }
-                    })
-                    .catch((err) => {
-                        console.warn("LIFF Init failed (Expected in preview mode):", err);
-                        // Continue anyway for web preview
-                    })
-                    .finally(() => {
-                        // Start App after init attempt
-                        setTimeout(() => app.init(), 500);
-                    });
+        // フォーム送信時の処理 (必須要件4)
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // 入力値の取得
+            const book = document.getElementById('book-select').value;
+            const flower = document.getElementById('flower-select').value;
+            const recipient = document.getElementById('recipient').value;
+            const message = document.getElementById('message').value;
+
+            // ローディング演出
+            inputArea.style.display = 'none';
+            loading.style.display = 'block';
+
+            setTimeout(() => {
+                loading.style.display = 'none';
+                showResult(book, flower, recipient, message);
+            }, 1000); // 1秒待機
+        });
+
+        // 結果を表示する関数
+        function showResult(book, flower, recipient, message) {
+            document.getElementById('result-book').textContent = book;
+            document.getElementById('flower-display').textContent = flowerIcons[flower] || '💐';
+            document.getElementById('result-recipient').textContent = `To: ${recipient}`;
+            document.getElementById('result-message').textContent = message;
+
+            resultArea.style.display = 'block';
+        }
+
+        // フォームをリセットする関数
+        function resetForm() {
+            resultArea.style.display = 'none';
+            inputArea.style.display = 'block';
+            form.reset();
+        }
+
+        // LINEでシェア（ダミー関数：実際のLIFF連携時はliff.sendMessage等を使う）
+        function shareLine() {
+            // LIFFが初期化され、ログイン済みの場合のみ実際に送信
+            if (isLiffInitialized && liff.isLoggedIn()) {
+                liff.sendMessages([{
+                    type: 'text',
+                    text: 'Book Bouquetを送りました！'
+                }]).then(() => {
+                    alert('LINEに送信しました');
+                    liff.closeWindow(); // 送信後に閉じる
+                }).catch((err) => {
+                    console.log('error', err);
+                    alert('送信に失敗しました: ' + err.message);
+                });
             } else {
-                console.error("LIFF SDK not found");
-                app.init();
+                 // デモモードまたはエラー時のフォールバック
+                 alert('【送信シミュレーション】\n素敵なブーケができましたね！\n\n※現在はデモモードのため、実際のLINE送信は行われません。\n※LIFF IDを設定すると実際のLINE連携が動作します。');
             }
-        };
+        }
 
+        // 必須要件2: LIFFの初期化コード
+        // bodyタグの最後の方に配置
+        document.addEventListener('DOMContentLoaded', function() {
+            const myLiffId = "2008614777-Z7PXQRbA"; // ここを実際のLIFF IDに書き換えてください
+
+            // プレースホルダーのままの場合は初期化をスキップしてエラーを防ぐ
+            if (myLiffId === "LIFF_ID_PLACEHOLDER") {
+                console.log("LIFF IDが設定されていないため、デモモードで起動します。(LIFF連携機能は動作しません)");
+                return;
+            }
+
+            liff.init({ liffId: myLiffId })
+                .then(() => {
+                    console.log("LIFF initialization succeeded");
+                    isLiffInitialized = true;
+                    // LIFFアプリとして開かれている場合の処理（ユーザー情報の取得など）をここに記述できます
+                })
+                .catch((err) => {
+                    console.error("LIFF initialization failed", err);
+                    // エラーハンドリング（通常のブラウザで開かれた場合のフォールバックなど）
+                });
+        });
     </script>
 </body>
 </html>
