@@ -14,12 +14,12 @@
 
     <style>
         :root {
-            /* 写真から抽出したカラーパレット */
-            --primary-pink: #F4C4C4; /* ラッピングのピンク */
-            --deep-pink: #E08A8A;
-            --leaf-green: #A8C686; /* スズランの葉の色 */
-            --text-color: #5A4A4A;
-            --bg-color: #FDFBF7;
+            /* 写真から抽出したカラーパレット (緑バージョンに変更) */
+            --primary-color: #CDE8D3; /* メイン：淡い若草色 */
+            --deep-color: #68B07D;    /* 強調：落ち着いた緑 */
+            --leaf-green: #558B6E;    /* テキスト用などの濃い緑 */
+            --text-color: #4A5A50;    /* 少し緑がかったダークグレー */
+            --bg-color: #F8FBF8;      /* ほんのり緑がかった白 */
             --white: #FFFFFF;
             --accent-gold: #D4AF37;
         }
@@ -50,7 +50,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.03);
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 100;
         }
 
         h1 {
@@ -61,7 +61,7 @@
         }
 
         h1 span {
-            color: var(--deep-pink);
+            color: var(--deep-color);
         }
 
         /* メインコンテナ */
@@ -72,7 +72,125 @@
             flex: 1;
         }
 
-        /* ヒーローエリア */
+        /* --- LPエリアのデザイン --- */
+        #lp-area {
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .lp-hero {
+            margin-bottom: 40px;
+            padding: 40px 0;
+            /* 緑系の優しいグラデーションに変更 */
+            background: radial-gradient(circle, #E6F5E9 0%, transparent 70%);
+        }
+
+        .lp-title {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            color: var(--deep-color);
+            line-height: 1.4;
+        }
+
+        .lp-subtitle {
+            font-size: 1rem;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        .lp-image-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #fff;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            border: 2px dashed var(--primary-color);
+            color: var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 簡易的なビジュアル装飾 */
+        .lp-image-placeholder::after {
+            content: '💐';
+            font-size: 5rem;
+            position: absolute;
+            opacity: 0.8;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .lp-section {
+            margin-bottom: 40px;
+            text-align: left;
+            padding: 20px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+
+        .lp-section h3 {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            color: var(--leaf-green);
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        .lp-section p {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        /* アプリ開始ボタン（CTA） */
+        .btn-start {
+            width: 100%;
+            padding: 18px;
+            /* 緑系のグラデーションに変更 */
+            background: linear-gradient(135deg, var(--deep-color), #8AC69B);
+            color: var(--white);
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(104, 176, 125, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-start::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(104, 176, 125, 0.5);
+        }
+
+        .btn-start:hover::after {
+            opacity: 1;
+        }
+
+        /* --- ここまでLP用デザイン --- */
+
+        /* ヒーローエリア（アプリ内） */
         .hero {
             text-align: center;
             margin-bottom: 32px;
@@ -114,8 +232,8 @@
         select:focus,
         textarea:focus {
             outline: none;
-            border-color: var(--leaf-green);
-            box-shadow: 0 0 0 3px rgba(168, 198, 134, 0.2);
+            border-color: var(--deep-color);
+            box-shadow: 0 0 0 3px rgba(104, 176, 125, 0.2);
         }
 
         textarea {
@@ -127,21 +245,22 @@
         .btn-submit {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, var(--primary-pink), var(--deep-pink));
+            background: linear-gradient(135deg, var(--primary-color), var(--deep-color));
             color: var(--white);
             border: none;
             border-radius: 50px;
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(224, 138, 138, 0.4);
+            box-shadow: 0 4px 15px rgba(104, 176, 125, 0.4);
             transition: transform 0.2s, box-shadow 0.2s;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1); /* 文字を見やすく */
             margin-top: 10px;
         }
 
         .btn-submit:active {
             transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(224, 138, 138, 0.4);
+            box-shadow: 0 2px 8px rgba(104, 176, 125, 0.4);
         }
 
         /* 結果表示エリア（カード風） */
@@ -162,7 +281,7 @@
             overflow: hidden;
         }
 
-        /* ピンクのクレープ紙風装飾 */
+        /* 緑のラッピング風装飾 */
         .gift-card::before {
             content: '';
             position: absolute;
@@ -172,8 +291,8 @@
             height: 8px;
             background: repeating-linear-gradient(
                 45deg,
-                var(--primary-pink),
-                var(--primary-pink) 10px,
+                var(--primary-color),
+                var(--primary-color) 10px,
                 #fff 10px,
                 #fff 20px
             );
@@ -195,7 +314,7 @@
 
         .message-box {
             background-color: #fff;
-            border: 1px dashed var(--primary-pink);
+            border: 1px dashed var(--primary-color);
             padding: 20px;
             border-radius: 8px;
             font-family: 'Zen Maru Gothic', sans-serif; /* 手書き風フォント */
@@ -253,14 +372,57 @@
 <body>
 
     <header>
-        <h1>Book <span>Bouquet</span></h1>
+        <h1 style="cursor: pointer;" onclick="goHome()">Book <span>Bouquet</span></h1>
     </header>
 
     <div class="container">
-        <!-- 入力フォームエリア -->
-        <div id="input-area">
+
+        <!-- LP (ランディングページ) エリア -->
+        <div id="lp-area">
+            <div class="lp-hero">
+                <div class="lp-image-placeholder"></div>
+                <h2 class="lp-title">絵本とお花を、<br>ブーケのように。</h2>
+                <p class="lp-subtitle">言葉の花束を、大切なあの人へ贈りませんか？</p>
+                <button class="btn-start" onclick="startApp()">ブーケをつくる</button>
+            </div>
+
+            <div class="lp-section">
+                <h3>Book Bouquetとは？</h3>
+                <p>
+                    「Book Bouquet」は、心温まる絵本と、花言葉を添えた栞（しおり）をセットにして贈る、新しいギフトサービスです。
+                </p>
+                <p>
+                    まるで花束を受け取ったときのような感動と、物語の世界に浸る優しい時間をプレゼントします。
+                </p>
+            </div>
+
+            <div class="lp-section">
+                <h3>ギフトの内容</h3>
+                <p>
+                    🌿 <b>選べる絵本</b><br>
+                    贈る相手に合わせて、厳選された名作絵本から一冊をお選びいただけます。
+                </p>
+                <p>
+                    🌷 <b>花の栞</b><br>
+                    「スズラン」や「ミモザ」など、伝えたい想いに合わせた花言葉を持つ透明な栞を添えます。
+                </p>
+                <p>
+                    🎁 <b>特別なラッピング</b><br>
+                    ナチュラルなグリーンの包み紙で優しく包み、麻紐で結んだブーケのようなラッピングでお届けします。
+                </p>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 40px;">
+                <p style="margin-bottom: 16px; font-size: 0.9rem;">さあ、あなたの想いを形にしましょう。</p>
+                <button class="btn-start" onclick="startApp()">今すぐ贈る</button>
+            </div>
+        </div>
+
+
+        <!-- アプリ入力フォームエリア (初期状態は非表示) -->
+        <div id="input-area" style="display: none;">
             <div class="hero">
-                <p>絵本とお花を、ブーケのように。<br>大切な人へ物語を贈りましょう。</p>
+                <p>絵本とお花を選んで、<br>メッセージを入力してください。</p>
             </div>
 
             <form id="bouquet-form">
@@ -296,6 +458,7 @@
                 </div>
 
                 <button type="submit" class="btn-submit">ブーケを作成する</button>
+                <p style="text-align:center; margin-top:15px; font-size:0.9rem; color:#888; cursor:pointer; text-decoration: underline;" onclick="goHome()">トップへ戻る</p>
             </form>
         </div>
 
@@ -328,12 +491,16 @@
                 <p style="margin-top:20px; font-size:0.8rem; color:#aaa; cursor:pointer;" onclick="resetForm()">
                     もう一度つくる
                 </p>
+                <p style="margin-top:10px; font-size:0.8rem; color:#aaa; cursor:pointer;" onclick="goHome()">
+                    トップへ戻る
+                </p>
             </div>
         </div>
     </div>
 
     <script>
         // DOM要素の取得
+        const lpArea = document.getElementById('lp-area');
         const form = document.getElementById('bouquet-form');
         const inputArea = document.getElementById('input-area');
         const resultArea = document.getElementById('result-area');
@@ -349,6 +516,24 @@
         
         // LIFF初期化状態フラグ
         let isLiffInitialized = false;
+
+        // --- 画面遷移関数 ---
+
+        // LPからアプリ開始
+        function startApp() {
+            lpArea.style.display = 'none';
+            inputArea.style.display = 'block';
+            window.scrollTo(0, 0); // ページ上部へ
+        }
+
+        // ホーム（LP）に戻る
+        function goHome() {
+            resultArea.style.display = 'none';
+            inputArea.style.display = 'none';
+            lpArea.style.display = 'block';
+            form.reset();
+            window.scrollTo(0, 0);
+        }
 
         // フォーム送信時の処理 (必須要件4)
         form.addEventListener('submit', function(e) {
